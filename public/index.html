@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./style.css" />
+    <title>Budget Tracker</title>
+  </head>
+  <body>
+    <main>
+      <div class="heading">
+        <img id="header-img" src="./assets/images/back.png" />
+        <div class="header-txt">Available Budget in <span id="date"></span> </div>
+        <div id="amount"></div>
+
+        <div class="add-amount">
+          <div class="header-income">
+            <p>INCOME</p>
+            <div id="income-amount"></div>
+          </div>
+        </div>
+
+        <div id="sub-amount">
+          <div class="header-expense">
+            <p>EXPENSE</p>
+              <div id="expense-amount"></div>
+              <div id="expense-percentage"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+  
+  
+      <div>
+        <div class="add-description ">
+          <select id="add-remove" name="add-remove">
+            <option value="+">+</option>
+            <option value="-">-</option>
+          </select>
+          <input id="input" required type="text" placeholder="Add description" />
+          <input id="value" required type="number" placeholder="Value"/>
+          <button type="submit" id="check-button"> 
+          <img class="check" src="https://img.icons8.com/color/24/000000/add--v1.png"/></button>
+        </div>
+      </div>
+  
+      <div class="bottom">
+        <div id="bottom-left">
+          <h3>INCOME</h3>
+          <table BORDER=0  CELLSPACING=0>
+            <tbody id="income-tbody">
+            <!-- <tr>
+              <td class="name">salary</td>
+              <td class="income">+1000</td>
+            </tr>
+            <tr>
+              <td class="name">project</td>
+              <td class="income">+5000</td>
+            </tr>
+            <tr>
+              <td class="name">intern</td>
+              <td class="income">+10000</td>
+            </tr> -->
+            </tbody>
+           
+            
+          </table>
+        </div>
+        <div id="bottom-right">
+          <h3>EXPENSE</h3>
+          <table  BORDER=0  CELLSPACING=0>
+            <tbody id="expense-tbody">
+              <!-- <tr>
+                <td class="name">rent</td>
+                <td class="expense">
+                  +3500
+                  <div class="percentage">100%</div>
+                  <img
+                    class="remove"
+                    src="https://img.icons8.com/ios/28/000000/cancel.png"
+                  />
+                </td>
+              </tr> -->
+            </tbody>
+          </table>
+          
+        </div>
+      </div>
+    </main>
+  </body>
+  <script src="https://www.gstatic.com/firebasejs/9.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.4.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.4.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.4.0/firebase-storage-compat.js"></script>
+
+  <script >
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOjHzQTOLpS1Qyd6ZO2Pfci19GiMUDY0A",
+      authDomain: "budget-tracker-43ba3.firebaseapp.com",
+      projectId: "budget-tracker-43ba3",
+      storageBucket: "budget-tracker-43ba3.appspot.com",
+      messagingSenderId: "578129037020",
+      appId: "1:578129037020:web:80cfcbce266b9eedec9619",
+      measurementId: "G-YXN03JRCGB",
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <!-- <script src="./script.js"></script> -->
+  <script src="./expense.js"></script>
+</html>
