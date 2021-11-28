@@ -9,17 +9,13 @@ const displayIncomeHTML = document.querySelector("#bottom-left");
 const displayExpenseHTML = document.querySelector("#bottom-right");
 const incomeTbodyHTML = document.querySelector("#income-tbody");
 const expenseTbodyHTML = document.querySelector("#expense-tbody");
-const percentageHTML = document.querySelector('#percentage');
-const dateHTML = document.querySelector('#date');
-const expensePercentageHTML = document.querySelector('#expense-percentage');
+const percentageHTML = document.querySelector("#percentage");
+const dateHTML = document.querySelector("#date");
+const expensePercentageHTML = document.querySelector("#expense-percentage");
 
 checkBtnHTML.addEventListener("click", addBudget);
 
 const db = firebase.firestore();
-
-// let incomeAmount = 0;
-// let expenseAmount = 0
-// let budget = incomeAmount + expenseAmount;
 let BUDGET = 0;
 let localTotalExpense = 0;
 let localTotalIncome = 0;
@@ -30,18 +26,20 @@ async function addBudget() {
   const addDescription = addDescriptionHTML.value;
   const value = valueHTML.value;
 
-  console.log(addRemove);
-  console.log(addDescription);
-  console.log(value);
+  // console.log('addBudget :: localTotalExpense : localTotalIncome : value',localTotalExpense,localTotalIncome, value );
 
-  if(!addDescription || !value || value <= 0 ) return;
 
-  
+  // console.log('addBudget : addRemove :',addRemove);
+  // console.log('addBudget : addDescription :',addDescription);
+  // console.log('addBudget : value :',value);
+
+  if (!addDescription || !value || value <= 0) return;
+
   const userData = {
     description: addDescription,
     value: value,
   };
-  
+
   if (addRemove === "+") {
     const ref = await db.collection("income").doc("income");
     const doc = await ref.get();
@@ -72,10 +70,12 @@ async function addBudget() {
       totalIncomeRef.set({ totalIncomes: +value });
     }
     // incomeAmountHTML.innerHTML =  totalIncomeData.totalIncomes;
-}
-
-
-   else {
+  } else {
+    if((localTotalExpense + +value) > localTotalIncome) {
+      alert('Expenses are exceeding than your limit')
+      return;
+    }
+    
     const ref = await db.collection("expense").doc("expense");
     const doc = await ref.get();
 
@@ -99,12 +99,10 @@ async function addBudget() {
       totalExpenses += +value;
       totalExpenseData.totalExpenses = totalExpenses; //updating
       totalExpenseRef.update(totalExpenseData);
-    } 
-    else {
+    } else {
       totalExpenseRef.set({ totalExpenses: +value });
     }
   }
-
 }
 
 async function updateIncome() {
@@ -155,7 +153,7 @@ async function updateExpenses() {
 
 // updateExpenses();
 
-async function deleteIncome(index){
+async function deleteIncome(index) {
   const ref = await db.collection("income").doc("income");
   const doc = await ref.get();
   const data = await doc.data();
@@ -168,18 +166,20 @@ async function deleteIncome(index){
   currentTotalIncome -= Number(data.allIncomes[index].value);
   totalIncomeData.totalIncomes = currentTotalIncome;
 
-  totalIncomeRef.update(totalIncomeData)
+  totalIncomeRef.update(totalIncomeData);
 
-  data.allIncomes.splice(index,1);
-  await ref.update(data)
+  data.allIncomes.splice(index, 1);
+  await ref.update(data);
 }
 
-async function deleteExpense(index){
+async function deleteExpense(index) {
   const ref = await db.collection("expense").doc("expense");
   const doc = await ref.get();
   const data = await doc.data();
 
-  const totalExpenseRef = await db.collection("totalExpense").doc("totalExpense");
+  const totalExpenseRef = await db
+    .collection("totalExpense")
+    .doc("totalExpense");
   const totalExpenseDoc = await totalExpenseRef.get();
   const totalExpenseData = await totalExpenseDoc.data();
 
@@ -189,20 +189,21 @@ async function deleteExpense(index){
 
   totalExpenseRef.update(totalExpenseData);
 
-  data.allExpenses.splice(index, 1)
-  await ref.update(data)
+  data.allExpenses.splice(index, 1);
+  await ref.update(data);
   // updateExpenses()
-
 }
 
-db.collection('income').doc('income').onSnapshot(snap => {
-  const data = snap.data();
+db.collection("income")
+  .doc("income")
+  .onSnapshot((snap) => {
+    const data = snap.data();
 
-  let incomeRows = "";
+    let incomeRows = "";
 
-  for (let i = 0; i < data.allIncomes.length; i++) {
-    const inc =  data.allIncomes[i];
-    incomeRows += `
+    for (let i = 0; i < data.allIncomes.length; i++) {
+      const inc = data.allIncomes[i];
+      incomeRows += `
     <tr>
       <td class="name">${inc.description}</td>
       <td class="income">+${parseFloat(inc.value).toFixed(2)}
@@ -210,36 +211,40 @@ db.collection('income').doc('income').onSnapshot(snap => {
       <img class="remove" src="https://img.icons8.com/plasticine/24/000000/filled-trash.png"/></button></td>
       
     </tr>`;
-  }
-  incomeTbodyHTML.innerHTML = incomeRows;
-})
+    }
+    incomeTbodyHTML.innerHTML = incomeRows;
+  });
 
- db.collection('expense').doc('expense').onSnapshot(async(snap) => {
-  const data = snap.data();
-  
-  const totalIncomeRef =  await db.collection("totalIncome").doc("totalIncome");
-  const totalIncomeDoc =  await totalIncomeRef.get();
-  const totalIncomeData = await totalIncomeDoc.data();
-  
-  const totalExpenseRef =  await db.collection("totalExpense").doc("totalExpense");
-  const totalExpenseDoc = await totalExpenseRef.get();
-  const totalExpenseData = await totalExpenseDoc.data();
+db.collection("expense")
+  .doc("expense")
+  .onSnapshot(async (snap) => {
+    const data = snap.data();
 
-  
+    const totalIncomeRef = await db
+      .collection("totalIncome")
+      .doc("totalIncome");
+    const totalIncomeDoc = await totalIncomeRef.get();
+    const totalIncomeData = await totalIncomeDoc.data();
 
-  let expenseRows = "";
-  for (let i = 0; i < data.allExpenses.length; i++) {
-    const exp = data.allExpenses[i];
-    let incomePercent =totalIncomeData.totalIncomes;
-  // let expensePercent = totalExpenseData.totalExpenses;
-    // console.log(incomePercent);
-    // console.log(exp.value);
-    // console.log(+exp.value/+incomePercent);
-    // console.log((+exp.value/+incomePercent)*100);
-   let percentage = (+exp.value/+incomePercent)*100 ;
-   percentage = Math.round(percentage) ;
-    // console.log(exp); 
-    expenseRows += `  
+    const totalExpenseRef = await db
+      .collection("totalExpense")
+      .doc("totalExpense");
+    const totalExpenseDoc = await totalExpenseRef.get();
+    const totalExpenseData = await totalExpenseDoc.data();
+
+    let expenseRows = "";
+    for (let i = 0; i < data.allExpenses.length; i++) {
+      const exp = data.allExpenses[i];
+      let incomePercent = totalIncomeData.totalIncomes;
+      // let expensePercent = totalExpenseData.totalExpenses;
+      // console.log(incomePercent);
+      // console.log(exp.value);
+      // console.log(+exp.value/+incomePercent);
+      // console.log((+exp.value/+incomePercent)*100);
+      let percentage = (+exp.value / +incomePercent) * 100;
+      percentage = Math.round(percentage);
+      // console.log(exp);
+      expenseRows += `  
     <tr>
       <td class="name">${exp.description}</td>
       <td class="expense">${parseFloat(exp.value).toFixed(2)}
@@ -249,57 +254,65 @@ db.collection('income').doc('income').onSnapshot(snap => {
 
       </button>
       </td>
-    </tr>`; 
-  }
-  expenseTbodyHTML.innerHTML = expenseRows;
-})
+    </tr>`;
+    }
+    expenseTbodyHTML.innerHTML = expenseRows;
+  });
 
-db.collection("totalIncome").doc("totalIncome").onSnapshot(snap => {
-  const data = snap.data();
-  incomeAmount =+ data.totalIncomes;
-  incomeAmountHTML.innerHTML = parseFloat(data.totalIncomes).toFixed(2);
-  localTotalIncome = +data.totalIncomes;
-  calBudget()
-  })
+db.collection("totalIncome")
+  .doc("totalIncome")
+  .onSnapshot((snap) => {
+    const data = snap.data();
+    incomeAmount = +data.totalIncomes;
+    incomeAmountHTML.innerHTML = parseFloat(data.totalIncomes).toFixed(2);
+    localTotalIncome = +data.totalIncomes;
+    calBudget();
+  });
 
-
-db.collection("totalExpense").doc("totalExpense").onSnapshot(snap => {
-  const data = snap.data();
-  expenseAmount =+ data.totalExpenses;
-  expenseAmountHTML.innerHTML = parseFloat(data.totalExpenses).toFixed(2);
-  localTotalExpense = +data.totalExpenses;
-  calBudget()
-
-})
-
+db.collection("totalExpense")
+  .doc("totalExpense")
+  .onSnapshot((snap) => {
+    const data = snap.data();
+    expenseAmount = +data.totalExpenses;
+    expenseAmountHTML.innerHTML = parseFloat(data.totalExpenses).toFixed(2);
+    localTotalExpense = +data.totalExpenses;
+    calBudget();
+  });
 
 function calBudget() {
-  BUDGET = localTotalIncome - localTotalExpense; 
-  if(BUDGET >= 0){
+  BUDGET = localTotalIncome - localTotalExpense;
+  if (BUDGET >= 0) {
     amountHTML.innerHTML = parseFloat(BUDGET).toFixed(2);
+  } else {
+    amountHTML.innerHTML = " Expenses exceeding income ";
   }
-  else{
-  amountHTML.innerHTML =" Expenses exceeding income "
-    
-  }
- 
-  let expensePercentage = (+localTotalExpense/+localTotalIncome)*100;
+
+  let expensePercentage = (+localTotalExpense / +localTotalIncome) * 100;
   expensePercentage = Math.round(expensePercentage);
-  if(expensePercentage > 0){
-  expensePercentageHTML.innerHTML = expensePercentage + '%';
-
-  }
-  else{
-  expensePercentageHTML.innerHTML = 0+'%';
-
+  if (expensePercentage > 0) {
+    expensePercentageHTML.innerHTML = expensePercentage + "%";
+  } else {
+    expensePercentageHTML.innerHTML = 0 + "%";
   }
   console.log(expensePercentage);
 }
 
-
 const date = new Date();
-const allMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];;
+const allMonths = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 const month = allMonths[date.getMonth()];
 const year = date.getFullYear();
 
-dateHTML.innerHTML = month + ' ' + year;
+dateHTML.innerHTML = month + " " + year;
